@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datamatics Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        #response {
+            margin-top: 20px;
+            color: green;
+            font-weight: bold;
+        }
+        #query-form {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Classify Sentiment Text</h1>
+    <div id="query-form">
+        <input type="text" id="query" placeholder="Enter your text here" autofocus>
+        <button id="submit-button">Enter</button>
+    </div>
+    <div id="response"></div>
+    <script>
+        const queryInput = document.getElementById('query');
+        const responseDiv = document.getElementById('response');
+        const submitButton = document.getElementById('submit-button');
+
+        const fetchResponse = async () => {
+            const query = queryInput.value.trim();
+            if (query === '') return; // Ignore empty input
+            queryInput.disabled = true; // Disable input temporarily
+            submitButton.disabled = true; // Disable button temporarily
+            responseDiv.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/sentiment_classify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                const data = await response.json();
+                responseDiv.textContent = data.answer;
+            } catch (error) {
+                responseDiv.textContent = 'Error occurred while fetching response.';
+            } finally {
+                queryInput.disabled = false; // Re-enable input
+                submitButton.disabled = false; // Re-enable button
+                queryInput.value = ''; // Clear input
+                queryInput.focus(); // Focus on the input again
+            }
+        };
+
+        // Call fetchResponse when the button is clicked
+        submitButton.addEventListener('click', fetchResponse);
+
+        // Also call fetchResponse when Enter key is pressed
+        queryInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                fetchResponse();
+            }
+        });
+    </script>
+</body>
+</html>
